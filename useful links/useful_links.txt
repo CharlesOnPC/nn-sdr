@@ -1,0 +1,7 @@
+Text Converter to convert ASCII string to binary:
+https://www.rapidtables.com/convert/number/ascii-to-binary.html
+
+Document to reference for computing parameters:https://ieeexplore.ieee.org/document/6069315
+
+Command to collect samples from SDR:
+rtl_sdr -f 156000000 -n 100000 ./samples
