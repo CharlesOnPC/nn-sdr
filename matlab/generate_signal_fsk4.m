@@ -112,7 +112,7 @@ while j ~= num_samples
 
     % Compute Average Instantaneous Amplitude
     for i=(j*Fs/4)+1:(j+1)*(Fs/4)
-        average_instataneous_amplitude = abs(y_awgn(1,i)) + average_instataneous_amplitude;
+        average_instataneous_amplitude = (y_awgn(1,i)) + average_instataneous_amplitude;
     end
 
     average_instataneous_amplitude = (1/(Fs/4))*average_instataneous_amplitude;
@@ -120,7 +120,7 @@ while j ~= num_samples
 
     % Compute the Value of the Normalized Amplitude
     for i=(j*Fs/4)+1:(j+1)*(Fs/4)
-        amplitude_normalized(1,i) = abs(y_awgn(1,i))/average_instataneous_amplitude;
+        amplitude_normalized(1,i) = (y_awgn(1,i))/average_instataneous_amplitude;
     end
 
     % Compute the Value of the Centered Normalized Instantaneous Amplitude
@@ -153,19 +153,19 @@ while j ~= num_samples
     %plot(t(1,1:Fs/4),(Fs/4)*abs(gamma_max),"LineWidth",3)
 
     % Declare the array for the unwrapped phase
-    unwrapped_phase(1,(j*Fs/4)+1:(j+1)*(Fs/4)) = unwrap(y_awgn(1,(j*Fs/4)+1:(j+1)*(Fs/4)));
+    unwrapped_phase(1,(j*Fs/4)+1:(j+1)*(Fs/4)) = wrapTo2Pi( unwrap(y_awgn(1,(j*Fs/4)+1:(j+1)*(Fs/4))) );
 
 
     % Compute the Value of the Centered Normalized Instantaneous Amplitude
     for i=(j*Fs/4)+1:(j+1)*(Fs/4)
         if(binary_signal(1,i) == 0)
-            centered_non_inear_instantaneous_phase(1,i) = unwrapped_phase(1,i) - ((2*pi*(Fc1)*i)/Fs);
+            centered_non_inear_instantaneous_phase(1,i) = unwrapped_phase(1,i) - ((2*pi*(Fc1)*(i-(j*Fs/4)))/Fs);
         elseif(binary_signal(1,i) == 1)
-            centered_non_inear_instantaneous_phase(1,i) = unwrapped_phase(1,i) - ((2*pi*(Fc2)*i)/Fs);
+            centered_non_inear_instantaneous_phase(1,i) = unwrapped_phase(1,i) - ((2*pi*(Fc2)*(i-(j*Fs/4)))/Fs);
         elseif(binary_signal(1,i) == 2)
-            centered_non_inear_instantaneous_phase(1,i) = unwrapped_phase(1,i) - ((2*pi*(Fc3)*i)/Fs);        
+            centered_non_inear_instantaneous_phase(1,i) = unwrapped_phase(1,i) - ((2*pi*(Fc3)*(i-(j*Fs/4)))/Fs);        
         elseif(binary_signal(1,i) == 3)
-            centered_non_inear_instantaneous_phase(1,i) = unwrapped_phase(1,i) - ((2*pi*(Fc4)*i)/Fs);        
+            centered_non_inear_instantaneous_phase(1,i) = unwrapped_phase(1,i) - ((2*pi*(Fc4)*(i-(j*Fs/4)))/Fs);        
         end
     end
 
