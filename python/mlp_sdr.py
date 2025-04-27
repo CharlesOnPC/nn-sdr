@@ -2,6 +2,7 @@ import pandas as pd
 import random
 import numpy
 import numpy as np
+import matplotlib.pyplot as plt
 from decimal import Decimal
 
 def relu(x):
@@ -162,7 +163,7 @@ neurons_bias_term  = numpy.zeros((1,8))
 
 output_layer = numpy.zeros((1,5))
 
-learning_rate = 1e-05
+learning_rate = 1e-03
 
 epochs = 1
 
@@ -192,6 +193,20 @@ weight_array_l2 = numbers2
 # [ 1.74759692,  0.71863305,  0.9426726,  -1.3776687,  -0.10919519, -0.70877275],
 # [ 0.88238845,  0.96138013,  0.0471728,  -0.41360722,  0.15878204, -0.76563724],
 # [-0.36276157,  0.07479978, -0.3115128,   0.03813933, -0.77853476, -0.27398166]])
+
+
+ask2_correct_matrix = [0] * 11
+ask4_correct_matrix = [0] * 11
+fsk2_correct_matrix = [0] * 11
+fsk4_correct_matrix = [0] * 11
+psk2_correct_matrix = [0] * 11
+psk4_correct_matrix = [0] * 11
+
+samples_correct_percentage = [0] * 11
+samples_correct_percentage_index = 0
+
+number_of_epochs = [0] * 11
+number_of_epochs_index = 0
 
 best_learning_rate = 0
 while epochs < 12:
@@ -235,10 +250,10 @@ while epochs < 12:
             for i in range(0,number_of_nodes):
                 for j in range(0,features+1):
                     if j <= features-1:
-                        weight_array_l1[i][j] = weight_array_l1[i][j] - (learning_rate * (error_derivative(expected_output[0,index-1],output[index-1])* softmax_derivative(z2,index-1)*h1.transpose()[i]*np.heaviside(h1[i],1)*test_set[k,j]))
-                        weight_array_l2[i][j] = weight_array_l2[i][j] - (learning_rate * (error_derivative(expected_output[0,index-1],output[index-1])* softmax_derivative(z2,index-1)*h1.transpose()[i]*np.heaviside(h1[i],1)))                
+                        weight_array_l1[i][j] = weight_array_l1[i][j] - (learning_rate * (np.square(error_derivative(expected_output[0,index-1],output[index-1]))* softmax_derivative(z2,index-1)*h1.transpose()[i]*np.heaviside(h1[i],1)*test_set[k,j]))
+                        weight_array_l2[i][j] = weight_array_l2[i][j] - (learning_rate * (np.square(error_derivative(expected_output[0,index-1],output[index-1]))* softmax_derivative(z2,index-1)*h1.transpose()[i]*np.heaviside(h1[i],1)))                
                     else:
-                        weight_array_l2[i][j] = weight_array_l2[i][j] - (learning_rate * (error_derivative(expected_output[0,index-1],output[index-1])* softmax_derivative(z2,index-1)*h1.transpose()[i]*np.heaviside(h1[i],1)))
+                        weight_array_l2[i][j] = weight_array_l2[i][j] - (learning_rate * (np.square(error_derivative(expected_output[0,index-1],output[index-1]))* softmax_derivative(z2,index-1)*h1.transpose()[i]*np.heaviside(h1[i],1)))
 
     # Establish integer to track correct results for each test
     ask2_correct = 0
@@ -323,4 +338,79 @@ while epochs < 12:
     #print('The percentage of correct results for PSK4 were, ',psk4_correct/psk4_tested)
     print('The current learning rate is ',learning_rate)
 
+
+
+    number_of_epochs[number_of_epochs_index] = number_of_epochs_index+1
+    
+    samples_correct_percentage[samples_correct_percentage_index] = (ask2_correct+ask4_correct+fsk2_correct+fsk4_correct+psk2_correct+psk4_correct)/(ask2_tested+ask4_tested+fsk2_tested+fsk4_tested+psk2_tested+psk4_tested)
+    
+    ask2_correct_matrix[number_of_epochs_index] = ask2_correct
+    ask4_correct_matrix[number_of_epochs_index] = ask4_correct
+    fsk2_correct_matrix[number_of_epochs_index] = fsk2_correct
+    fsk4_correct_matrix[number_of_epochs_index] = fsk4_correct
+    psk2_correct_matrix[number_of_epochs_index] = psk2_correct
+    psk4_correct_matrix[number_of_epochs_index] = psk4_correct
+    
+    number_of_epochs_index += 1
+    samples_correct_percentage_index += 1
+
+
     epochs += 1
+
+
+# Plot the total successes per epoch
+plt.figure()
+plt.plot(number_of_epochs,samples_correct_percentage)
+plt.title('All Modulation Classes')
+plt.xlabel('Number of Epochs')
+plt.ylabel('Percentage of Classification Successes')
+plt.show()
+
+# Plot the total successes per epoch for ASK-2
+plt.figure()
+plt.plot(number_of_epochs,ask2_correct_matrix)
+plt.title('ASK-2 for 100 Samples')
+plt.xlabel('Number of Epochs')
+plt.ylabel('Number of Classification Successes')
+plt.show()
+
+# Plot the total successes per epoch for ASK-4
+plt.figure()
+plt.plot(number_of_epochs,ask4_correct_matrix)
+plt.title('ASK-4 for 100 Samples')
+plt.xlabel('Number of Epochs')
+plt.ylabel('Number of Classification Successes')
+plt.show()
+# Plot the total successes per epoch for FSK-2
+plt.figure()
+plt.plot(number_of_epochs,fsk2_correct_matrix)
+plt.title('FSK-2 for 100 Samples')
+plt.xlabel('Number of Epochs')
+plt.ylabel('Number of Classification Successes')
+plt.show()
+
+# Plot the total successes per epoch for FSK-4
+plt.figure()
+plt.plot(number_of_epochs,fsk4_correct_matrix)
+plt.title('FSK-4 for 100 Samples')
+plt.xlabel('Number of Epochs')
+plt.ylabel('Number of Classification Successes')
+plt.show()
+
+
+# Plot the total successes per epoch for PSK-2
+plt.figure()
+plt.plot(number_of_epochs,psk2_correct_matrix)
+plt.title('PSK-2 for 100 Samples')
+plt.xlabel('Number of Epochs')
+plt.ylabel('Number of Classification Successes')
+plt.show()
+
+# Plot the total successes per epoch for PSK-4
+plt.figure()
+plt.plot(number_of_epochs,psk4_correct_matrix)
+plt.title('PSK-4 for 100 Samples')
+plt.xlabel('Number of Epochs')
+plt.ylabel('Number of Classification Successes')
+plt.show()
+
