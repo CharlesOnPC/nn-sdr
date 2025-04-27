@@ -44,59 +44,88 @@ psk4_test_data = pd.read_excel("psk4_test_data.xls",header=None)
 
 ######## ASK2 ########
 
-# Scale the first column down
+# Scale the second column down
 ask2_test_data.iloc[:,1] = ask2_test_data.iloc[:,1]/100000000
 
 # Slice the first 200 samples of the test set for ASK2 for training
-ask2_test_set = ask2_test_data.iloc[0:199,:]
+ask2_test_set = ask2_test_data.iloc[0:200,:]
 
 # Slice the next 100 samples of the test set for ASK2 validation on MLP
-ask2_validation_set = ask2_test_data.iloc[200:299,:]
+ask2_validation_set = ask2_test_data.iloc[200:300,:]
 
 
 
 ######## ASK4 ########
+
+# Scale the first column down
+ask4_test_data.iloc[:,1] = ask4_test_data.iloc[:,1]/10000
+
 # Slice the first 200 samples of the test set for ASK4 for training
-ask4_test_set = ask4_test_data.iloc[0:199,:]
+ask4_test_set = ask4_test_data.iloc[0:200,:]
 
 # Slice the next 100 samples of the test set for ASK4 validation on MLP
-ask4_validation_set = ask4_test_data.iloc[200:299,:]
+ask4_validation_set = ask4_test_data.iloc[200:300,:]
 
 ######## FSK2 ########
+
+# Scale the first column down
+fsk2_test_data.iloc[:,1] = fsk2_test_data.iloc[:,1]/1000000000
+
 # Slice the first 200 samples of the test set for FSK2 for training
-fsk2_test_set = fsk2_test_data.iloc[0:199,:]
+fsk2_test_set = fsk2_test_data.iloc[0:200,:]
 
 # Slice the next 100 samples of the test set for FSK2 validation on MLP
-fsk2_validation_set = fsk2_test_data.iloc[200:299,:]
+fsk2_validation_set = fsk2_test_data.iloc[200:300,:]
 
 ######## FSK4 ########
+
+# Scale the first column down
+fsk4_test_data.iloc[:,1] = fsk4_test_data.iloc[:,1]/1000000000
+
 # Slice the first 200 samples of the test set for FSK4 for training
-fsk4_test_set = fsk4_test_data.iloc[0:199,:]
+fsk4_test_set = fsk4_test_data.iloc[0:200,:]
 
 # Slice the next 100 samples of the test set for ASK4 validation on MLP
-fsk4_validation_set = fsk4_test_data.iloc[200:299,:]
+fsk4_validation_set = fsk4_test_data.iloc[200:300,:]
 
 ######## PSK2 ########
+
+# Scale the first column down
+psk2_test_data.iloc[:,1] = psk2_test_data.iloc[:,1]/10000
+
 # Slice the first 200 samples of the test set for PSK2 for training
-psk2_test_set = psk2_test_data.iloc[0:199,:]
+psk2_test_set = psk2_test_data.iloc[0:200,:]
 
 # Slice the next 100 samples of the test set for PSK2 validation on MLP
-psk2_validation_set = psk2_test_data.iloc[200:299,:]
+psk2_validation_set = psk2_test_data.iloc[200:300,:]
 
 ######## PSK4 ########
-psk4_test_set = psk4_test_data.iloc[0:199,:]
 
-psk4_validation_set = psk4_test_data.iloc[200:299,:]
+# Scale the first column down
+psk2_test_data.iloc[:,1] = psk2_test_data.iloc[:,1]/1000
+
+psk4_test_set = psk4_test_data.iloc[0:200,:]
+
+psk4_validation_set = psk4_test_data.iloc[200:300,:]
 
 ######## Array with all Modulation Forms ########
 test_set = numpy.zeros((6*200,6))
 
-test_set[0:199]   = ask2_test_set.iloc[0:199,:]
-test_set[200:399] = ask4_test_set.iloc[0:199,:]
-test_set[400:599] = fsk2_test_set.iloc[0:199,:]
-test_set[600:799] = fsk4_test_set.iloc[0:199,:]
-test_set[800:999] = psk2_test_set.iloc[0:199,:]
-test_set[1000:1199] = psk4_test_set.iloc[0:199,:]
+test_set[0:200]   = ask2_test_set.iloc[0:200,:]
+test_set[200:400] = ask4_test_set.iloc[0:200,:]
+test_set[400:600] = fsk2_test_set.iloc[0:200,:]
+test_set[600:800] = fsk4_test_set.iloc[0:200,:]
+test_set[800:1000] = psk2_test_set.iloc[0:200,:]
+test_set[1000:1200] = psk4_test_set.iloc[0:200,:]
+
+######## Array with all Modulation Forms for Validation ########
+validation_set = numpy.zeros((6*100,6))
+validation_set[0:99,:]  = ask2_validation_set.iloc[0:99,:]
+validation_set[100:199] = ask4_validation_set.iloc[0:99,:]
+validation_set[200:299] = fsk2_validation_set.iloc[0:99,:]
+validation_set[300:399] = fsk4_validation_set.iloc[0:99,:]
+validation_set[400:499] = psk2_validation_set.iloc[0:99,:]
+validation_set[500:599] = psk4_validation_set.iloc[0:99,:]
 
 # Declare number of features #
 features = 5
@@ -115,50 +144,158 @@ neurons_bias_term  = numpy.zeros((1,8))
 
 output_layer = numpy.zeros((1,5))
 
-# Choose random weight values to start
-weight_array_l1 = np.random.randn(number_of_nodes,features)
-weight_array_l2 = np.random.randn(number_of_nodes,features+1)
+learning_rate = 1e-05
 
-learning_rate = 0.1
-epochs = 500
+epochs = 1
 
-for epoch in range (0,epochs):
-    print('On epoch number , ',epoch)
-    for k in range(0,test_set.shape[0]):
+best_learning_rate = 0
 
-        # Forward Pass starting with first data set
-        z1 = numpy.dot(weight_array_l1,test_set[k,:-1],)
+while learning_rate == 1e-05:
+    # Choose random weight values to start
+    weight_array_l1 = np.random.randn(number_of_nodes,features)
+    weight_array_l2 = np.random.randn(number_of_nodes,features+1)
 
+    # Shuffle test data
+    np.random.shuffle(test_set)
+
+    for epoch in range (0,epochs):
+        #print('On epoch number , ',epoch)
+        for k in range(0,test_set.shape[0]):
+
+            # Forward Pass starting with first data set
+            z1 = numpy.dot(weight_array_l1,test_set[k,:-1],)
+
+            # Apply Activation Function
+            h1 = relu(z1)
+
+            z2 = numpy.dot(h1.transpose(),weight_array_l2)
+
+
+            output = softmax(z2)
+
+            # Debug Print Test Set
+            #print(test_set)
+
+            # Get index of position of classification
+            index = test_set[k,-1]
+
+
+            index = int(index)
+
+            # Create matrix with expected value
+            expected_output = numpy.zeros((1,6))
+
+            expected_output[0,index-1] = 1
+
+            # Compute the error value
+            error = (1/2)*np.square(np.subtract(expected_output,output))
+            if(k >= 201 and k < 401):
+                print('Output on iteration is ,',k,' is ',output)
+                print('Error on iteration is ,',k,' is ',error)
+
+
+            for i in range(0,number_of_nodes):
+                for j in range(0,features+1):
+                    if j <= features-1:
+                        weight_array_l1[i][j] = weight_array_l1[i][j] - (learning_rate * (error_derivative(expected_output[0,index-1],output[index-1])* softmax_derivative(z2,index-1)*h1.transpose()[i]*np.heaviside(h1[i],0.5)*test_set[k,j]))
+                        weight_array_l2[i][j] = weight_array_l2[i][j] - (learning_rate * (error_derivative(expected_output[0,index-1],output[index-1])* softmax_derivative(z2,index-1)*h1.transpose()[i]*np.heaviside(h1[i],0.5)))                
+                    else:
+                        weight_array_l2[i][j] = weight_array_l2[i][j] - (learning_rate * (error_derivative(expected_output[0,index-1],output[index-1])* softmax_derivative(z2,index-1)*h1.transpose()[i]*np.heaviside(h1[i],0.5)))
+
+
+    # Establish integer to track correct results for each test
+    ask2_correct = 0
+    ask4_correct = 0
+    fsk2_correct = 0
+    fsk4_correct = 0
+    psk2_correct = 0
+    psk4_correct = 0
+
+    ask2_tested = 0
+    ask4_tested = 0
+    fsk2_tested = 0
+    fsk4_tested = 0
+    psk2_tested = 0
+    psk4_tested = 0
+
+    # Forward Pass starting with first data set
+    for k in range(0,validation_set.shape[0]):
+
+        z1 = numpy.dot(weight_array_l1,validation_set[k,:-1],)
         # Apply Activation Function
         h1 = relu(z1)
-
         z2 = numpy.dot(h1.transpose(),weight_array_l2)
-
-
         output = softmax(z2)
-
         # Debug Print Test Set
         #print(test_set)
-
         # Get index of position of classification
-        index = test_set[k,-1]
-
+        index = validation_set[k,-1]
         index = int(index)
-
+        #print('Index on iteration , ',k,' is ',index)
+        #print('Output on iteration, ',k,' is ',output)
         # Create matrix with expected value
         expected_output = numpy.zeros((1,6))
-
         expected_output[0,index-1] = 1
-
-
         # Compute the error value
         error = (1/2)*np.square(np.subtract(expected_output,output))
 
-        # New weight matrix
-        new_weight_array_l1  = numpy.zeros((number_of_nodes,features))
-        new_weight_array_l2  = numpy.zeros((number_of_nodes,features+1))
+        match index:
+            case 1:
+                ask2_tested += 1
+                if(output[0] == np.max(output)):
+                    ask2_correct +=1
+            case 2:
+                ask4_tested += 1
+                if(output[1] == np.max(output)):
+                    ask4_correct +=1
+            case 3:
+                fsk2_tested += 1
+                if(output[2] == np.max(output)):
+                    fsk2_correct +=1        
+            case 4:
+                fsk4_tested += 1
+                if(output[3] == np.max(output)):
+                    fsk4_correct +=1
+            case 5:
+                psk2_tested += 1
+                if(output[4] == np.max(output)):
+                    psk2_correct +=1
+            case 6:
+                psk4_tested += 1
+                if(output[5] == np.max(output)):
+                    psk4_correct +=1
+            case _:
+                psk4_tested += 1
+                if(output[5] == np.max(output)):
+                    psk4_correct +=1
 
-        for i in range(0,number_of_nodes):
-            for j in range(0,features):
-                weight_array_l1[i][j] = weight_array_l1[i][j] - (learning_rate * (error_derivative(expected_output[0,index-1],output[index-1])* softmax_derivative(z2,index-1)*h1.transpose()[i]*np.heaviside(h1[i],0.5)*test_set[k,j]))
-                weight_array_l2[i][j] = weight_array_l2[i][j] - (learning_rate * (error_derivative(expected_output[0,index-1],output[index-1])* softmax_derivative(z2,index-1)*h1.transpose()[i]*np.heaviside(h1[i],0.5)))
+    print('The total number of test for ASK2 were, ', ask2_tested)
+    print('The correctly predicted number of test for ASK2 were, ',ask2_correct)
+    #print('The percentage of correct results for ASK2 were, ',ask2_correct/ask2_tested)
+
+    print('The total number of test for ASK4 were, ', ask4_tested)
+    print('The correctly predicted number of test for ASK4 were, ',ask4_correct)
+    #print('The percentage of correct results for ASK4 were, ',ask4_correct/ask4_tested)
+
+    print('The total number of test for FSK2 were, ', fsk2_tested)
+    print('The correctly predicted number of test for FSK2 were, ',fsk2_correct)
+    #print('The percentage of correct results for FSK2 were, ',fsk2_correct/fsk2_tested)
+
+    print('The total number of test for FSK4 were, ', fsk4_tested)
+    print('The correctly predicted number of test for FSK4 were, ',fsk4_correct)
+    #print('The percentage of correct results for FSK4 were, ',fsk4_correct/fsk4_tested)
+
+    print('The total number of test for PSK2 were, ', psk2_tested)
+    print('The correctly predicted number of test for PSK2 were, ',psk2_correct)
+    #print('The percentage of correct results for PSK2 were, ',psk2_correct/psk2_tested)
+
+    print('The total number of test for PSK4 were, ', psk4_tested)
+    print('The correctly predicted number of test for PSK4 were, ',psk4_correct)
+    #print('The percentage of correct results for PSK4 were, ',psk4_correct/psk4_tested)
+    print('The current learning rate is ',learning_rate)
+    if(ask2_correct > 10 and ask4_correct > 10 and fsk2_correct > 10 and fsk4_correct > 10 and psk2_correct > 10 and psk4_correct > 10):
+        best_learning_rate = learning_rate
+
+    learning_rate = learning_rate*0.1
+
+print('The best learning rate is, ',best_learning_rate)
